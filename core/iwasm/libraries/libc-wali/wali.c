@@ -285,7 +285,7 @@ int64_t total_native_time = 0;
     struct timespec vt_tstart = { 0, 0 }; \
     gettime(&vt_tstart);
 
-#define RETURN(v, syscall, num_args...)                            \
+#define RETURN(v, syscall, num_args, ...)                          \
     {                                                              \
         long frv = v;                                              \
         struct timespec vt_tend = { 0, 0 };                        \
@@ -391,15 +391,17 @@ strace_print(long syscall_res, char *syscall_name, int num_args, ...)
         offset += sprintf(&buf[offset], "%s(", syscall_name);
         for (int i = 0; i < num_args; i++) {
             if (i == num_args - 1) {
-                offset += sprintf(&buf[offset], "%lld", (long long int) argv[i]);
+                offset += sprintf(&buf[offset], "%lld", (long long int)argv[i]);
             }
             else {
-                offset += sprintf(&buf[offset], "%lld, ", (long long int) argv[i]);
+                offset +=
+                    sprintf(&buf[offset], "%lld, ", (long long int)argv[i]);
             }
         }
-        offset += sprintf(&buf[offset], ") = %lld \n", (long long int) syscall_res);
+        offset +=
+            sprintf(&buf[offset], ") = %lld \n", (long long int)syscall_res);
         int num_written_bytes = write(strace_fd, buf, offset);
-        (void) num_written_bytes;
+        (void)num_written_bytes;
     }
 }
 
@@ -1204,9 +1206,11 @@ wali_syscall_fcntl(wasm_exec_env_t exec_env, long a1, long a2, long a3)
     switch (a2) {
 #if __aarch64__
         case F_GETFL:
-            RETURN(swap_open_flags(__syscall3(SYS_fcntl, a1, a2, a3)); break);
+            RETURN(swap_open_flags(__syscall3(SYS_fcntl, a1, a2, a3)), "fcntl",
+                   3, a1, a2, a3);
         case F_SETFL:
-            RETURN(__syscall3(SYS_fcntl, a1, a2, swap_open_flags(a3)); break);
+            RETURN(__syscall3(SYS_fcntl, a1, a2, swap_open_flags(a3)), "fcntl",
+                   3, a1, a2, a3);
 #endif
         case F_GETLK:
         case F_SETLK:
@@ -1803,7 +1807,8 @@ wali_syscall_openat(wasm_exec_env_t exec_env, long a1, long a2, long a3,
         RETURN(-1, "openat", 4, a1, a2, a3, a4);
     }
 #if __aarch64__
-    RETURN(__syscall4(SYS_openat, a1, MADDR(a2), swap_open_flags(a3), a4));
+    RETURN(__syscall4(SYS_openat, a1, MADDR(a2), swap_open_flags(a3), a4),
+           "openat", 4, a1, a2, a3, a4);
 #else
     RETURN(__syscall4(SYS_openat, a1, MADDR(a2), a3, a4), "openat", 4, a1, a2,
            a3, a4);
@@ -2011,7 +2016,8 @@ wali_syscall_dup3(wasm_exec_env_t exec_env, long a1, long a2, long a3)
 {
     SC(292, dup3);
 #if __aarch64__
-    RETURN(__syscall3(SYS_dup3, a1, a2, swap_open_flags(a3)));
+    RETURN(__syscall3(SYS_dup3, a1, a2, swap_open_flags(a3)), "dup3", 3, a1, a2,
+           a3);
 #else
     RETURN(__syscall3(SYS_dup3, a1, a2, a3), "dup3", 3, a1, a2, a3);
 #endif
@@ -2023,7 +2029,8 @@ wali_syscall_pipe2(wasm_exec_env_t exec_env, long a1, long a2)
 {
     SC(293, pipe2);
 #if __aarch64__
-    RETURN(__syscall2(SYS_pipe2, MADDR(a1), swap_open_flags(a2)));
+    RETURN(__syscall2(SYS_pipe2, MADDR(a1), swap_open_flags(a2)), "pipe2", 2,
+           a1, a2);
 #else
     RETURN(__syscall2(SYS_pipe2, MADDR(a1), a2), "pipe2", 2, a1, a2);
 #endif
