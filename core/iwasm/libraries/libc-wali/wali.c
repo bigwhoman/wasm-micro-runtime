@@ -509,6 +509,7 @@ wali_syscall_mmap(wasm_exec_env_t exec_env, long a1, long a2, long a3, long a4,
                   long a5, long a6)
 {
     SC(9, mmap);
+    printf("mmap called \n");
     VB("mmap args | a1: %ld, a2: 0x%x, a3: %ld, a4: %ld, a5: %ld, a6: %ld | "
        "MMAP_PAGELEN: %d",
        a1, a2, a3, a4, a5, a6, MMAP_PAGELEN);
@@ -537,8 +538,8 @@ wali_syscall_mmap(wasm_exec_env_t exec_env, long a1, long a2, long a3, long a4,
                                      inc_wasm_pages)) {
             FATALSC(mmap, "Out of memory!\n");
             goto mmap_fail;
-        }
-    }
+        >}
+    >}
 
     Addr mem_addr =
         (Addr)__syscall6(SYS_mmap, mmap_addr, a2, a3, MAP_FIXED | a4, a5, a6);
@@ -1106,6 +1107,7 @@ wali_syscall_getsockopt(wasm_exec_env_t exec_env, long a1, long a2, long a3,
 long
 wali_syscall_fork(wasm_exec_env_t exec_env)
 {
+
     SC(57, fork);
 #if __x86_64__
     RETURN(__syscall0(SYS_fork), "fork", 0, 0);
@@ -2287,6 +2289,7 @@ wali_wasm_thread_spawn(wasm_exec_env_t exec_env, int setup_fnptr, int arg_wasm)
     uint32_t stack_size = 8192;
     int thread_id = -1;
     int ret = -1;
+    printf("hello from spawn!!!\n");
 
     /* Table 0 is only supported currently */
     wasm_function_inst_t setup_wasm_fn =
@@ -2366,7 +2369,10 @@ thread_spawn_fail:
 }
 
 /* Native WALI Symbols */
-#define NSYMBOL(symbol, fn, sign) { #symbol, (void *)fn, sign, NULL }
+#define NSYMBOL(symbol, fn, sign)       \
+    {                                   \
+#symbol, (void *)fn, sign, NULL \
+    }
 
 static NativeSymbol wali_native_symbols[] = {
     // Syscalls

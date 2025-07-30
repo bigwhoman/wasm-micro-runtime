@@ -37,6 +37,7 @@ __syscall2(long n, long a1, long a2)
 static __inline long
 __syscall3(long n, long a1, long a2, long a3)
 {
+    printf("gooopi forkoo %d\n", getpid());
     unsigned long ret;
     __asm__ __volatile__("syscall"
                          : "=a"(ret)
